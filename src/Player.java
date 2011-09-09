@@ -23,7 +23,7 @@ public class Player {
     ///Times returned by getTime() are in milliseconds
 	void Initialize(boolean pFirst,Date pDue)
 	{
-		mRandom=new Random();
+		//mRandom=new Random();
 	}
 	    
     ///perform a move
@@ -43,7 +43,10 @@ public class Player {
 	     * Here you should write your clever algorithms to get the best next move.
 	     * This skeleton returns instead a random movement from the legal ones.
 	     */
-	    return lMoves.elementAt(mRandom.nextInt(lMoves.size()));
+	    
+	    return lMoves.elementAt(0);
+	    
+	    //return lMoves.elementAt(mRandom.nextInt(lMoves.size()));
 	}
 
 	Random mRandom;
