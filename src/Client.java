@@ -95,7 +95,7 @@ public class Client {
 	
 		        lBoard.DoMove(lMove);
 	
-		        lMove=lPlayer.Play(lBoard,lTime);
+		        lMove=lPlayer.Play(lBoard,lTime,lMove);
 		        
 		        lOut.println(lMove.ToString());
 		        lOut.flush();
