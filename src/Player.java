@@ -35,6 +35,7 @@ public class Player {
 		tree.continueGeneratingTree();
 		tree.continueGeneratingTree();
 		tree.continueGeneratingTree();
+		tree.continueGeneratingTree();
 
 	}
 
@@ -49,25 +50,20 @@ public class Player {
 		// pBoard.Print();
 
 		pBoard.PrintNoColor();
-
-		/*
-		 * tree=new Tree(pBoard, Board.CELL_OWN); tree.continueGeneratingTree();
-		 * tree.continueGeneratingTree(); tree.continueGeneratingTree();
-		 * tree.continueGeneratingTree();
-		 */
-
+	
 		Move nMove = tree.findMove(move);
 		if (nMove != null) {
 			tree.changeHead(nMove);
 		}
+		
 		tree.continueGeneratingTree();
 		tree.continueGeneratingTree();
+		
 		Move nextMove = tree.chooseBestMove();
 		tree.changeHead(nextMove);
 
 		return nextMove;
 
-		// return lMoves.elementAt(mRandom.nextInt(lMoves.size()));
 	}
 
 }

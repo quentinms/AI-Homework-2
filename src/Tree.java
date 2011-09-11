@@ -3,6 +3,7 @@ import java.util.Vector;
 public class Tree {
 
 	Node head;
+	int depth;
 	static Vector<Node> lastGeneration;
 	static Vector<Node> previousGeneration;
 
@@ -10,17 +11,19 @@ public class Tree {
 		lastGeneration = new Vector<Node>();
 		head = new Node(initialBoard, firstPlayer);
 		lastGeneration.add(head);
+		depth=0;
 	}
 
 	public Move chooseBestMove() {
-		return head.possibleMoves.elementAt(find(alphaBetaPrunning(head,
-				Integer.MIN_VALUE, Integer.MAX_VALUE)));
+		int gr=miniMax(head);
+		System.out.println("Chosen move is: "+gr);
+		return head.possibleMoves.elementAt(find(gr));
 	}
 
 	public int find(int negaNumber) {
 		boolean found = false;
 		int i = -1;
-		while (!found) {
+		while (!found && i < head.children.length - 1) {
 			i++;
 			if (head.children[i].negaScoutNumber == negaNumber) {
 				found = true;
@@ -53,6 +56,7 @@ public class Tree {
 	}
 
 	public int alphaBetaPrunning(Node n, int alpha, int beta) {
+
 		int val;
 		if (alpha > beta)
 			System.out.println("blublu");
@@ -70,7 +74,7 @@ public class Tree {
 					beta = Math.min(beta, val);
 				}
 			} else {
-				val = -Integer.MAX_VALUE;
+				val = Integer.MIN_VALUE;
 				for (Node cn : n.children) {
 					val = Math.max(val, alphaBetaPrunning(cn, alpha, beta));
 					if (val >= beta) {
@@ -84,15 +88,38 @@ public class Tree {
 			n.negaScoutNumber = val;
 			return val;
 		}
+
+	}
+
+	public int miniMax(Node n) {
+
 		/*
-		 * fonction ALPHABETA(P, alpha, beta) si P est une feuille alors
-		 * retourner la valeur de P sinon si P est un nÏud Min alors Val =
-		 * infini pour tout fils Pi de P faire Val = Min(Val, ALPHABETA(Pi,
-		 * alpha, beta)) si alpha ³ Val alors retourner Val beta = Min(beta,
-		 * Val) finpour sinon Val = -infini pour tout fils Pi de P faire Val =
-		 * Max(Val, ALPHABETA(Pi, alpha, beta)) si Val ³ beta alors retourner
-		 * Val alpha = Max(alpha, Val) finpour finsi retourner Val finsi fin
+		 * if(max's turn) for each child score = alpha-beta(other
+		 * player,child,alpha,beta) if score > alpha then alpha = score (we have
+		 * found a better best move) if alpha >= beta then return alpha (cut
+		 * off) return alpha (this is our best move) else (min's turn) for each
+		 * child score = alpha-beta(other player,child,alpha,beta) if score <
+		 * beta then beta = score (opponent has found a better worse move) if
+		 * alpha >= beta then return beta (cut off
 		 */
+
+		if (n.children == null)
+			return n.gradeNode();
+		else if (n.player == Board.CELL_OWN) {
+			int val = Integer.MIN_VALUE;
+			for (Node child : n.children) {
+				val = Math.max(val, miniMax(child));
+			}
+			n.negaScoutNumber = val;
+			return val;
+		} else {
+			int val = Integer.MAX_VALUE;
+			for (Node child : n.children) {
+				val = Math.min(val, miniMax(child));
+			}
+			n.negaScoutNumber = val;
+			return val;
+		}
 
 	}
 
@@ -111,14 +138,16 @@ public class Tree {
 		int index = head.possibleMoves.indexOf(move);
 		head = head.children[index];
 		lastGeneration = new Vector<Node>();
-		findLastGeneration(lastGeneration);
+		findLastGeneration(lastGeneration,head);
+		depth--;
+		System.out.println("Changed head: "+lastGeneration.size());
 	}
 
-	public void findLastGeneration(Vector<Node> lastGen) {
-		for (Node n : head.children) {
+	public void findLastGeneration(Vector<Node> lastGen,Node node) {
+		for (Node n : node.children) {
 			if (n.children == null) {
 				lastGen.add(n);
-			}
+			}else{findLastGeneration(lastGen,n);}
 		}
 	}
 
@@ -129,6 +158,8 @@ public class Tree {
 			lastGeneration.remove(n);
 			n.createChildren();
 		}
+		depth++;
+		System.out.println("Current depth:"+depth+"|Current children:"+lastGeneration.size());
 	}
 
 }
@@ -137,39 +168,24 @@ class Node {
 
 	public static final byte inverse = new Byte("3");
 
-	Node parent;
 	Board currentBoard;
 	Node[] children;
 	Vector<Move> possibleMoves;
-	int numberOfPossibleMoves;
 	int negaScoutNumber;
 	int grade;
-	int gradeModifier;
 	byte player;
-	int depth;
 
 	public Node(Node parentNode, Move move, byte who) {
-		parent = parentNode;
 		player = who;
 		possibleMoves = new Vector<Move>();
-		gradeModifier = 0;
-		grade = parentNode.grade;
+		grade = Integer.MIN_VALUE;
 		negaScoutNumber = 0;
 
-		currentBoard = new Board(parent.currentBoard, move);
+		currentBoard = new Board(parentNode.currentBoard, move);
 
-		if (move.IsJump()) {
-			gradeModifier += move.Length() - 1;
-		}
-		if (move.IsEOG()) {
-			gradeModifier += 100;
-		}
-
-		grade += (Math.pow(-1, player + 1)) * gradeModifier;
 		negaScoutNumber = grade;
 
 		currentBoard.FindPossibleMoves(possibleMoves, player);
-		depth = parent.depth + 1;
 
 		// currentBoard.PrintNoColor();
 
@@ -177,11 +193,9 @@ class Node {
 
 	public Node(Board initialBoard, byte firstplayer) {
 
-		parent = null;
 		currentBoard = initialBoard;
 		possibleMoves = new Vector<Move>();
-		depth = 0;
-		grade = 0;
+		grade = Integer.MIN_VALUE;
 		player = firstplayer;
 
 		currentBoard.FindPossibleMoves(possibleMoves, player);
@@ -192,13 +206,44 @@ class Node {
 
 	public void createChildren() {
 
-		numberOfPossibleMoves = possibleMoves.size();
-		children = new Node[numberOfPossibleMoves];
+		children = new Node[possibleMoves.size()];
 
 		for (int i = 0; i < children.length; i++) {
 			children[i] = new Node(this, possibleMoves.elementAt(i),
 					(byte) (player ^ inverse));
 			Tree.lastGeneration.add(children[i]);
+		}
+
+	}
+
+	public int gradeNode() {
+		if (grade != Integer.MIN_VALUE) {
+			return grade;
+		} else {
+			int gr=0;
+			for(int r=7;r>=0;r--)
+	        {
+	            for(int c=7;c>=0;c--)
+	            {
+	               if((currentBoard.At(r,c)&Board.CELL_OWN)!=0)
+	                {
+	                    if((currentBoard.At(r,c)&Board.CELL_KING)!=0)
+	                        gr+=50;
+	                    else
+	                        gr+=10;
+	                }
+	                else if((currentBoard.At(r,c)&Board.CELL_OTHER)!=0)
+	                {
+	                    if((currentBoard.At(r,c)&Board.CELL_KING)!=0)
+	                        gr-=50;
+	                    else
+	                        gr-=10;
+	                }
+	            }
+	        }
+			//System.out.println("Grade is "+gr);
+			grade=gr;
+			return gr;
 		}
 
 	}
