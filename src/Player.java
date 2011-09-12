@@ -2,6 +2,9 @@ import java.util.Date;
 
 public class Player {
 
+	
+	static int tour=1;
+	
 	Tree tree;
 
 	// /called when waiting for the other player to move
@@ -36,6 +39,8 @@ public class Player {
 		tree.continueGeneratingTree();
 		tree.continueGeneratingTree();
 		tree.continueGeneratingTree();
+		tree.continueGeneratingTree();
+		System.out.println("blu");
 
 	}
 
@@ -49,8 +54,11 @@ public class Player {
 		// does)
 		// pBoard.Print();
 
-		pBoard.PrintNoColor();
-	
+		//pBoard.PrintNoColor();
+		if(Debug.equalBoards(pBoard.mCell, new Board().mCell)){System.exit(0);}
+		
+		System.out.println(tour);tour++;
+		
 		Move nMove = tree.findMove(move);
 		if (nMove != null) {
 			tree.changeHead(nMove);
