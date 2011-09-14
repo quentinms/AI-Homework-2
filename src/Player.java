@@ -1,12 +1,7 @@
 import java.util.Date;
 
 public class Player {
-
 	
-	static int tour=1;
-	
-	Tree tree;
-
 	// /called when waiting for the other player to move
 
 	// /\param pBoard the current state of the board
@@ -25,23 +20,7 @@ public class Player {
 	// /new Date().getTime()+100>pDue.getTime()
 	// /Times returned by getTime() are in milliseconds
 	void Initialize(boolean pFirst, Date pDue) {
-		// mRandom=new Random();
-
-		if (pFirst) {
-			System.out.println("Play first!");
-			tree = new Tree(new Board(), Board.CELL_OWN);
-		} else {
-			System.out.println("Play second!");
-			tree = new Tree(new Board(), Board.CELL_OTHER);
-		}
-		tree.continueGeneratingTree();
-		tree.continueGeneratingTree();
-		tree.continueGeneratingTree();
-		tree.continueGeneratingTree();
-		tree.continueGeneratingTree();
-		tree.continueGeneratingTree();
-		System.out.println("blu");
-
+		
 	}
 
 	// /perform a move
@@ -49,28 +28,16 @@ public class Player {
 	// /\param pBoard the current state of the board
 	// /\param pDue time before which we must have returned
 	// /\return the move we make
-	Move Play(Board pBoard, Date pDue, Move move) {
+	Move Play(Board pBoard, Date pDue) {
 		// use the commented version if your system supports ANSI color (linux
 		// does)
 		// pBoard.Print();
 
 		//pBoard.PrintNoColor();
-		if(Debug.equalBoards(pBoard.mCell, new Board().mCell)){System.exit(0);}
-		
-		System.out.println(tour);tour++;
-		
-		Move nMove = tree.findMove(move);
-		if (nMove != null) {
-			tree.changeHead(nMove);
-		}
-		
-		tree.continueGeneratingTree();
-		tree.continueGeneratingTree();
-		
-		Move nextMove = tree.chooseBestMove();
-		tree.changeHead(nextMove);
-
-		return nextMove;
+		Node n = new Node(pBoard, null, Board.CELL_OWN,null);
+		Node blu = n.alphaBetaPruning(10, new Node(Integer.MIN_VALUE,"alpha"), new Node(Integer.MAX_VALUE,"beta"), Board.CELL_OWN);
+	System.out.println(blu.algoValue);
+		return blu.findOriginalMove(blu);
 
 	}
 

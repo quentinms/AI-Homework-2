@@ -38,7 +38,7 @@ public class Client {
 		    Date lTime; //time when initialization must be done
 		    String lLine=lIn.readLine();
 		    String[] lTokens=lLine.split("[ ]+");
-		    lFirst=Boolean.parseBoolean(lTokens[1]);
+		    lFirst=Integer.parseInt(lTokens[1])!=0;
 		    if(lStandalone)
     		    lTime=new Date(new Date().getTime()+19000);
             else
@@ -95,7 +95,7 @@ public class Client {
 	
 		        lBoard.DoMove(lMove);
 	
-		        lMove=lPlayer.Play(lBoard,lTime,lMove);
+		        lMove=lPlayer.Play(lBoard,lTime);
 		        
 		        lOut.println(lMove.ToString());
 		        lOut.flush();
